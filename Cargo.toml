@@ -4,12 +4,13 @@ version = "0.1.0"
 authors = ["Pegleg <pegleg@linux.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-libc = { version = "*", features=[] }
+libc = { version = "0.2.71", features=[] }
+
 
 [profile.release]
-panic = "abort"
+opt-level = 'z'
+codegen-units = 1
+panic = 'abort'
 
 
