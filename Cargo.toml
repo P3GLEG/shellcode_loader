@@ -1,5 +1,5 @@
 [package]
-name = "shellcoder"
+name = "shellcode_loader"
 version = "0.1.0"
 authors = ["Pegleg <pegleg@linux.com>"]
 edition = "2018"
