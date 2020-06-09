@@ -5,8 +5,7 @@ authors = ["Pegleg <pegleg@linux.com>"]
 edition = "2018"
 
 [dependencies]
-libc = { version = "0.2.71", features=[] }
-winapi = { version = "0.3", features = ["winuser"] }
+libc = { version = "*"}
 
 [profile.release]
 opt-level = 'z'
