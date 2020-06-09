@@ -8,6 +8,8 @@
 /// The main benefit is compliation with the toolchains Rust offers. It's a lot easier to compile a
 /// windows binary without using mingw etc.
 
+
+mod metasploit;
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! { loop {} }
 
