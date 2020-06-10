@@ -7,7 +7,7 @@
 /// The main benefit is compliation with the toolchains Rust offers. It's a lot easier to compile a
 /// windows binary
 
-//This is required to link against Libc seems to fail without it
+//This is required fails without it
 #[cfg(any(unix, macos))]
 #[link(name = "c")]
 extern "C" {}
@@ -19,6 +19,7 @@ static MAC_PAYLOAD: [u8; 51] = [
     0x21, 0x0d, 0x0a,
 ]; //Hello world x64
 
+#[cfg(target_os = "windows")]
 #[no_mangle]
 #[link_section = ".text"] //Without this the payload ends up in non executable memory
 static WINDOWS_PAYLOAD: [u8; 199] = [
@@ -37,6 +38,7 @@ static WINDOWS_PAYLOAD: [u8; 199] = [
     0x54, 0x53, 0xff, 0xd6, 0x57, 0xff, 0xd,
 ]; //Messagebox x86 payload
 
+#[cfg(target_os = "unix")]
 static LINUX_PAYLOAD: [u8; 49] = [
     0xeb, 0x1e, 0xb8, 0x01, 0x00, 0x00, 0x00, 0xbf, 0x01, 0x00, 0x00, 0x00, 0x5e, 0xba, 0x0c, 0x00,
     0x00, 0x00, 0x0f, 0x05, 0xb8, 0x3c, 0x00, 0x00, 0x00, 0xbf, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x05,
@@ -44,23 +46,28 @@ static LINUX_PAYLOAD: [u8; 49] = [
     0x0a,
 ]; //Hello world x86
 
+#[cfg(target_os = "unix")]
+pub extern "C" fn main() {
+    let exec_data: extern "C" fn() -> ! =
+        core::mem::transmute(&LINUX_PAYLOAD as *const _ as *const ());
+    exec_data();
+}
+
+#[cfg(target_os = "windows")]
+pub extern "C" fn main() {
+    let exec_data: extern "C" fn() -> ! =
+        core::mem::transmute(&WINDOWS_PAYLOAD as *const _ as *const ());
+    exec_data();
+}
+
+#[cfg(target_os = "macos")]
 #[no_mangle]
 pub extern "C" fn main() {
     unsafe {
-        if cfg!(target_os = "macos") {
-            let exec_data: extern "C" fn() -> ! =
-                core::mem::transmute(&MAC_PAYLOAD as *const _ as *const ());
-            exec_data();
-        } else if cfg!(target_os = "windows") {
-            let exec_data: extern "C" fn() -> ! =
-                core::mem::transmute(&WINDOWS_PAYLOAD as *const _ as *const ());
-            exec_data();
-        } else {
-            let exec_data: extern "C" fn() -> ! =
-                core::mem::transmute(&LINUX_PAYLOAD as *const _ as *const ());
-            exec_data();
-        }
-    };
+        let exec_data: extern "C" fn() -> ! =
+            core::mem::transmute(&MAC_PAYLOAD as *const _ as *const ());
+        exec_data();
+    }
 }
 
 #[panic_handler]
