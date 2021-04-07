@@ -12,6 +12,7 @@
 #[link(name = "c")]
 extern "C" {}
 
+#[cfg(target_os = "mac")]
 static MAC_PAYLOAD: [u8; 51] = [
     0xeb, 0x1e, 0x5e, 0xb8, 0x04, 0x00, 0x00, 0x02, 0xbf, 0x01, 0x00, 0x00, 0x00, 0xba, 0x0e, 0x00,
     0x00, 0x00, 0x0f, 0x05, 0xb8, 0x01, 0x00, 0x00, 0x02, 0xbf, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x05,
@@ -38,26 +39,31 @@ static WINDOWS_PAYLOAD: [u8; 199] = [
     0x54, 0x53, 0xff, 0xd6, 0x57, 0xff, 0xd,
 ]; //Messagebox x86 payload
 
-#[cfg(target_os = "unix")]
-static LINUX_PAYLOAD: [u8; 49] = [
+#[cfg(target_os = "linux")]
+#[link_section = ".text"]
+static LINUX_PAYLOAD: [u8; 50] = [
     0xeb, 0x1e, 0xb8, 0x01, 0x00, 0x00, 0x00, 0xbf, 0x01, 0x00, 0x00, 0x00, 0x5e, 0xba, 0x0c, 0x00,
     0x00, 0x00, 0x0f, 0x05, 0xb8, 0x3c, 0x00, 0x00, 0x00, 0xbf, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x05,
     0xe8, 0xdd, 0xff, 0xff, 0xff, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64,
-    0x0a,
+    0x0, 0xa0,
 ]; //Hello world x86
-
-#[cfg(target_os = "unix")]
-pub extern "C" fn main() {
-    let exec_data: extern "C" fn() -> ! =
-        core::mem::transmute(&LINUX_PAYLOAD as *const _ as *const ());
-    exec_data();
-}
 
 #[cfg(target_os = "windows")]
 pub extern "C" fn main() {
     let exec_data: extern "C" fn() -> ! =
-        core::mem::transmute(&WINDOWS_PAYLOAD as *const _ as *const ());
+        core::mem::transmute(&WINDOWS_PAYLOAD);
     exec_data();
+}
+
+
+#[no_mangle]
+#[cfg(target_os = "linux")]
+pub extern "C" fn main() {
+    unsafe {
+        let exec_data: extern "C" fn() -> ! =
+            core::mem::transmute(&LINUX_PAYLOAD);
+        exec_data();
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -65,7 +71,7 @@ pub extern "C" fn main() {
 pub extern "C" fn main() {
     unsafe {
         let exec_data: extern "C" fn() -> ! =
-            core::mem::transmute(&MAC_PAYLOAD as *const _ as *const ());
+            core::mem::transmute(&MAC_PAYLOAD);
         exec_data();
     }
 }
@@ -76,8 +82,6 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 }
 
 #[no_mangle]
-#[cfg(all(target_env = "gnu", target_os = "windows", target_arch = "x86"))] // This is required if compiling using mingw
 pub extern "C" fn rust_eh_register_frames() {}
 #[no_mangle]
-#[cfg(all(target_env = "gnu", target_os = "windows", target_arch = "x86"))]
 pub extern "C" fn rust_eh_unregister_frames() {}

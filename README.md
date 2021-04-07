@@ -1,15 +1,6 @@
-## How to generate hello world shellcode for linux
-```bash
-nasm -f elf64 -o hello.o hello.asm
-ld -o  hello hello.o
-objdump -M intel -d hello
-```
-
 ### How to compile for linux
 ```bash
-rustup target add x86_64-unknown-linux-musl
-brew install FiloSottile/musl-cross/musl-cross
-cargo build --release --target x86_64-unknown-linux-musl
+cargo build --release --target x86_64-unknown-linux-gnu --bin shellcode_loader
 ```
 
 ### How to compile for mac

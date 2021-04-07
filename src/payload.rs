@@ -16,25 +16,27 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 #[no_mangle]
 unsafe fn mac_shell() {
     const payload: u64 = 0x68732f6e69622f_u64;
-    asm!("
+    asm!(
+        "
     xor  rax, rax
     cdq
     push rax
-    ");
+    "
+    );
     asm!("
          push rdi
          push rsp
          pop  rdi
          ", inout("rdi") payload => _,);
-    asm!("
+    asm!(
+        "
     xor  rsi, rsi
     mov  al, 0x2
     ror  rax, 0x28
     mov  al, 0x3b
-    syscall");
+    syscall"
+    );
 }
-
-
 
 unsafe fn hello() {
     let buf = "Hello world\n";

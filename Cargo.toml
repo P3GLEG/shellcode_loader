@@ -1,16 +1,19 @@
+cargo-features = ["strip"]
+
 [package]
 name = "shellcode_loader"
 version = "0.1.0"
 authors = ["Pegleg <pegleg@linux.com>"]
 edition = "2018"
 
-[dependencies]
-libc = { version = "*"}
+
 
 [profile.release]
 opt-level = 'z'
 codegen-units = 1
 panic = 'abort'
+strip = "symbols"
+lto = true
 
 [[bin]]
 name = "shellcode_loader"
